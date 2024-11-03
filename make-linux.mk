@@ -246,13 +246,13 @@ ifeq ($(CC_MACH),armv7ve)
 endif
 ifeq ($(CC_MACH),arm64)
 	ZT_ARCHITECTURE=4
-	ZT_SSO_SUPPORTED=1
+	ZT_SSO_SUPPORTED=0
 	ZT_USE_X64_ASM_ED25519=0
 	override DEFS+=-DZT_NO_TYPE_PUNNING -DZT_ARCH_ARM_HAS_NEON -march=armv8-a+crypto -mtune=generic -mstrict-align
 endif
 ifeq ($(CC_MACH),aarch64)
 	ZT_ARCHITECTURE=4
-	ZT_SSO_SUPPORTED=1
+	ZT_SSO_SUPPORTED=0
 	ZT_USE_X64_ASM_ED25519=0
 	override DEFS+=-DZT_NO_TYPE_PUNNING -DZT_ARCH_ARM_HAS_NEON -march=armv8-a+crypto -mtune=generic -mstrict-align
 	ifeq ($(ZT_CONTROLLER),1)
@@ -557,7 +557,7 @@ echo_flags:
 
 debian: echo_flags
 	@echo "building deb package"
-	debuild --no-lintian -I -i -us -uc -nc -b
+	debuild --preserve-env --no-lintian -I -i -us -uc -nc -b
 	# debuild --no-lintian -b -uc -us
 
 # debian:	FORCE
