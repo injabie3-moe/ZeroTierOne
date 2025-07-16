@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-arm64:
-    name: Build ZeroTier for arm64
+    name: Build and package ZeroTier (arm64)
     runs-on: ubuntu-latest
 
     env:
@@ -19,25 +19,25 @@ jobs:
       - name: 🛠 Checkout source
         uses: actions/checkout@v3
 
-      - name: 📦 Install cross-compiler toolchain
+      - name: 📦 Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             gcc-aarch64-linux-gnu \
             g++-aarch64-linux-gnu \
             binutils-aarch64-linux-gnu \
-            make
+            make \
+            dpkg-dev fakeroot \
+            devscripts build-essential lintian debhelper
 
       - name: 🔧 Patch make-linux.mk to disable SSO
         run: |
           sed -i 's/^\(.*ZT_SSO_SUPPORTED=\)1/\10/' make-linux.mk
 
-      - name: 🧱 Build ZeroTier
+      - name: 🧱 Build and package (.deb) using Makefile
         run: |
-          make -f Makefile CC=${CC} CXX=${CXX} ZT_UBIQUITI=${ZT_UBIQUITI}
-
-      - name: 🧪 Verify binary architecture
-        run: file zerotier-one
+          make CC=${CC} CXX=${CXX} ZT_UBIQUITI=${ZT_UBIQUITI}
+          make debian CC=${CC} CXX=${CXX} ZT_UBIQUITI=${ZT_UBIQUITI}
 
       - name: 🏷 Set metadata for artifact
         id: vars
@@ -45,9 +45,9 @@ jobs:
           echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           echo "date_tag=$(date +'%Y%m%d')" >> "$GITHUB_OUTPUT"
 
-      - name: 📤 Upload compiled binary
+      - name: 📤 Upload .deb package
         uses: actions/upload-artifact@v4
         with:
-          name: zerotier-arm64-${{ steps.vars.outputs.date_tag }}-${{ steps.vars.outputs.short_sha }}
-          path: zerotier-one
+          name: zerotier-arm64-deb-${{ steps.vars.outputs.date_tag }}-${{ steps.vars.outputs.short_sha }}
+          path: '*.deb'
 
