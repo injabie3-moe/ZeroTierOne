@@ -59,12 +59,36 @@ jobs:
 
       - name: 🧱 Build and package (.deb) using Makefile
         run: |
-          make CC=${CC} CXX=${CXX} ZT_UBIQUITI=${ZT_UBIQUITI}
-          make debian CC=${CC} CXX=${CXX} ZT_UBIQUITI=${ZT_UBIQUITI}
+          CC=${CC} CXX=${CXX} ZT_UBIQUITI=${ZT_UBIQUITI} make debian
 
       - name: 🚚 Move generated .deb into workspace
         run: |
           find .. -maxdepth 1 -name "*.deb" -exec mv {} . \;
+
+      - name: 🧩 Recompress .deb to xz
+        run: |
+          set -e
+          DEB_FILE=$(ls ./*.deb | head -n1)
+          mkdir repack && cd repack
+
+          # Extract components
+          ar x "../$DEB_FILE"
+
+          # Recompress zstd → xz
+          if [ -f control.tar.zst ]; then
+            zstd -d < control.tar.zst | xz > control.tar.xz
+          fi
+          if [ -f data.tar.zst ]; then
+            zstd -d < data.tar.zst | xz > data.tar.xz
+          fi
+
+          # Recreate the package
+          ar -m -c -a sdsd "../${DEB_FILE%.deb}-xz.deb" debian-binary control.tar.xz data.tar.xz
+
+          # Cleanup
+          cd ..
+          rm -rf repack
+
       - name: 🏷 Set metadata for artifact
         id: vars
         run: |
@@ -75,5 +99,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zerotier-arm64-deb-${{ steps.vars.outputs.date_tag }}-${{ steps.vars.outputs.short_sha }}
-          path: '*.deb'
+          path: '*-xz.deb'
 
