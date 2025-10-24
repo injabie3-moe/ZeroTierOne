@@ -1,3 +1,9 @@
+# Injabie3 - 2025-10-23
+# Ubiquiti build script for ZeroTier
+#
+# This GitHub Action is based on the steps from the following blog post:
+# https://blog.injabie3.moe/2024/02/23/cross-compiling-zerotier-for-ubiquiti-devices
+#
 name: Cross-compile ZeroTier for Ubiquiti (arm64)
 
 on:
