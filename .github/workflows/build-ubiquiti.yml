@@ -59,7 +59,7 @@ jobs:
 
       - name: 🧱 Build and package (.deb) using Makefile
         run: |
-          CC=${CC} CXX=${CXX} ZT_UBIQUITI=${ZT_UBIQUITI} make debian
+          CC=${CC} CXX=${CXX} ZT_UBIQUITI=${ZT_UBIQUITI} ZT_STATIC=1 make debian
 
       - name: 🚚 Move generated .deb into workspace
         run: |
