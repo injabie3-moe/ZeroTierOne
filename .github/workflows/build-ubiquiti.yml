@@ -67,9 +67,9 @@ jobs:
         run: |
           CC=${CC} CXX=${CXX} ZT_UBIQUITI=${ZT_UBIQUITI} ZT_STATIC=1 make debian
 
-      - name: 🚚 Move generated .deb into workspace
+      - name: 🚚 Move generated artifacts into workspace
         run: |
-          find .. -maxdepth 1 -name "*.deb" -exec mv {} . \;
+          find .. -maxdepth 1 -name "*arm64.*" -exec mv {} . \;
 
       - name: 🧩 Recompress .deb to xz
         run: |
@@ -106,4 +106,10 @@ jobs:
         with:
           name: zerotier-arm64-${{ steps.vars.outputs.date_tag }}-${{ steps.vars.outputs.short_sha }}-deb
           path: '*-xz.deb'
+
+      - name: 📤 Upload debug artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: zerotier-arm64-${{ steps.vars.outputs.date_tag }}-${{ steps.vars.outputs.short_sha }}-debug
+          path: '*arm64.*'
 
